@@ -1,0 +1,5 @@
+{
+  "name": "LarvaScan Analytica",
+  "description": "Uma plataforma avançada de análise de dados para monitoramento de focos de larvas e pupas (Aedes aegypti e outros), com filtragem por bairros, ciclos e importação de planilhas.",
+  "requestFramePermissions": []
+}
