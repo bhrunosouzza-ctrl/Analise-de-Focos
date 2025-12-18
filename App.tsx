@@ -114,7 +114,7 @@ const App: React.FC = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Analise");
-    XLSX.writeFile(wb, `LarvaScan_Timoteo_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `Focos_Encontrados_Timoteo_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleExportPDF = () => {
@@ -123,7 +123,7 @@ const App: React.FC = () => {
 
     doc.setFontSize(20);
     doc.setTextColor(79, 70, 229);
-    doc.text("TIMÓTEO LARVASCAN", 14, 20);
+    doc.text("ANÁLISE DE FOCOS ENCONTRADOS", 14, 20);
     
     doc.setFontSize(10);
     doc.setTextColor(100);
@@ -186,7 +186,7 @@ const App: React.FC = () => {
       }
     });
 
-    doc.save(`Relatorio_LarvaScan_Timoteo_Completo_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`Relatorio_Focos_Encontrados_Timoteo_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const bairros = useMemo(() => ['Todos', ...Array.from(new Set(data.map(r => r.Bairro)))].sort(), [data]);
@@ -202,7 +202,7 @@ const App: React.FC = () => {
               <Bug className="text-white w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 leading-none tracking-tight">TIMÓTEO <span className="text-indigo-600">LARVASCAN</span></h1>
+              <h1 className="text-xl font-black text-slate-900 leading-none tracking-tight">ANÁLISE DE <span className="text-indigo-600">FOCOS ENCONTRADOS</span></h1>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Saneamento & Vigilância</p>
             </div>
           </div>
