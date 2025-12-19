@@ -103,14 +103,14 @@ export const LarvaMap: React.FC<Props> = ({ records }) => {
   }, [records]);
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8 h-[550px] flex flex-col">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-rose-600" />
+    <div className="bg-slate-900 rounded-3xl shadow-sm border border-slate-800 overflow-hidden mb-8 h-[550px] flex flex-col">
+      <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+        <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-rose-500" />
           Mapa de Focos Ativos - Timóteo
         </h3>
         {loading && (
-          <div className="flex items-center gap-2 text-indigo-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
+          <div className="flex items-center gap-2 text-indigo-400 text-[10px] font-black uppercase tracking-widest animate-pulse">
             Sincronizando coordenadas...
           </div>
         )}
