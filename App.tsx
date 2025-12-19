@@ -10,7 +10,7 @@ import { LarvaMap } from './components/LarvaMap';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
 } from 'recharts';
-import { Search, Upload, FileSpreadsheet, FileText, Bug, Database, Hash, PieChart as ChartIcon, Filter, X, Trophy, XCircle } from 'lucide-react';
+import { Search, Upload, FileSpreadsheet, FileText, Bug, Database, Hash, PieChart as ChartIcon, Filter, X, Trophy, XCircle, FileUp } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
 
@@ -23,14 +23,19 @@ const App: React.FC = () => {
   const [selectedTipoAt, setSelectedTipoAt] = useState('Todos');
   const [showRanking, setShowRanking] = useState(false);
 
+  // Carrega cache com segurança
   useEffect(() => {
-    const cached = localStorage.getItem('larvascan_last_data_raw') || '';
-    if (cached) {
-      try {
-        setData(JSON.parse(cached));
-      } catch (e) {
-        console.error("Erro ao carregar cache de dados", e);
+    try {
+      const cached = localStorage.getItem('larvascan_last_data_raw');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setData(parsed);
+        }
       }
+    } catch (e) {
+      console.error("Erro ao carregar cache de dados", e);
+      localStorage.removeItem('larvascan_last_data_raw');
     }
   }, []);
 
@@ -61,10 +66,17 @@ const App: React.FC = () => {
           });
           setData(records);
           localStorage.setItem('larvascan_last_data_raw', JSON.stringify(records));
+        } else {
+          alert("O arquivo parece estar vazio ou sem o cabeçalho correto.");
         }
       } catch (err) {
-        alert("Erro ao ler arquivo.");
+        console.error(err);
+        alert("Erro ao ler arquivo. Verifique se é um arquivo Excel válido.");
       }
+      setLoading(false);
+    };
+    reader.onerror = () => {
+      alert("Erro ao carregar o arquivo.");
       setLoading(false);
     };
     reader.readAsBinaryString(file);
@@ -193,6 +205,46 @@ const App: React.FC = () => {
   const ciclos = useMemo(() => ['Todos', ...Array.from(new Set(data.map(r => r.Ciclo)))].sort(), [data]);
   const tiposAtividade = useMemo(() => ['Todos', ...Array.from(new Set(data.map(r => r.Tipo_At)))].sort(), [data]);
 
+  // Tela de Importação Inicial
+  if (data.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full">
+          <div className="bg-indigo-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(79,70,229,0.4)] animate-bounce">
+            <Bug className="text-white w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-black text-white mb-4 tracking-tighter uppercase">ANÁLISE DE <span className="text-indigo-400">FOCOS ENCONTRADOS</span></h1>
+          <p className="text-slate-400 font-medium mb-10 text-sm leading-relaxed">
+            Bem-vindo ao sistema de vigilância entomológica. Importe sua planilha de focos para iniciar a análise estatística.
+          </p>
+          
+          <label className="group relative block w-full bg-slate-900 border-2 border-dashed border-slate-800 hover:border-indigo-500 p-12 rounded-[2.5rem] cursor-pointer transition-all hover:bg-slate-800/50">
+            <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
+            <div className="flex flex-col items-center gap-4">
+              <div className="bg-slate-800 p-4 rounded-full group-hover:bg-indigo-600 transition-colors">
+                <FileUp className="w-8 h-8 text-indigo-400 group-hover:text-white" />
+              </div>
+              <span className="text-sm font-black text-slate-300 uppercase tracking-widest">Selecionar Planilha XLSX</span>
+              <span className="text-xs text-slate-500 font-bold">Arraste ou clique para navegar</span>
+            </div>
+          </label>
+          
+          <div className="mt-12 flex justify-center gap-8 grayscale opacity-40">
+            <div className="flex items-center gap-2"><Database className="w-4 h-4 text-slate-400" /> <span className="text-[10px] font-bold text-slate-500">DADOS SEGUROS</span></div>
+            <div className="flex items-center gap-2"><Trophy className="w-4 h-4 text-slate-400" /> <span className="text-[10px] font-bold text-slate-500">RANKING REAL</span></div>
+          </div>
+        </div>
+
+        {loading && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-50 flex items-center justify-center flex-col">
+            <div className="w-14 h-14 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h2 className="text-white font-black uppercase tracking-[0.4em] text-[10px]">Processando Base de Dados...</h2>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-20 bg-slate-950">
       <header className="bg-slate-900 border-b border-slate-800 h-20 sticky top-0 z-30 flex items-center shadow-lg">
@@ -213,10 +265,17 @@ const App: React.FC = () => {
             <button onClick={handleExportExcel} className="bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 transition-all shadow-sm">
               <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> EXCEL
             </button>
-            <label className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-2xl text-xs font-black cursor-pointer flex items-center gap-2 transition-all shadow-lg shadow-indigo-900/20">
-              <Upload className="w-4 h-4" /> IMPORTAR XLSX
-              <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
-            </label>
+            <button 
+              onClick={() => {
+                if(confirm("Deseja realmente limpar os dados e importar um novo arquivo?")) {
+                  setData([]);
+                  localStorage.removeItem('larvascan_last_data_raw');
+                }
+              }}
+              className="bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 transition-all"
+            >
+              <Upload className="w-4 h-4 text-indigo-400" /> NOVO ARQUIVO
+            </button>
           </div>
         </div>
       </header>
